@@ -1,0 +1,1027 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Python电商数据分析学习平台</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/theme/dracula.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/python/python.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/pyodide/v0.24.1/full/pyodide.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #e3f2fd 0%, #f5f9ff 100%);
+            color: #1a237e;
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        header {
+            background: linear-gradient(135deg, #1565c0 0%, #0d47a1 100%);
+            color: white;
+            padding: 20px 40px;
+            box-shadow: 0 4px 20px rgba(13, 71, 161, 0.3);
+        }
+
+        h1 {
+            font-size: 2rem;
+            font-weight: 600;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 30px 20px;
+        }
+
+        .nav-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            background: white;
+            padding: 15px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+        }
+
+        .nav-tab {
+            padding: 12px 28px;
+            background: #e3f2fd;
+            border: none;
+            border-radius: 8px;
+            color: #1565c0;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .nav-tab:hover {
+            background: #bbdefb;
+            transform: translateY(-2px);
+        }
+
+        .nav-tab.active {
+            background: linear-gradient(135deg, #1565c0 0%, #0d47a1 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(13, 71, 161, 0.4);
+        }
+
+        .section {
+            display: none;
+        }
+
+        .section.active {
+            display: block;
+        }
+
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+            border-left: 4px solid #1565c0;
+        }
+
+        .chapter-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            padding: 10px 0;
+        }
+
+        .chapter-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #0d47a1;
+        }
+
+        .chapter-toggle {
+            font-size: 1.5rem;
+            color: #1565c0;
+            transition: transform 0.3s ease;
+        }
+
+        .chapter-header.expanded .chapter-toggle {
+            transform: rotate(180deg);
+        }
+
+        .chapter-content {
+            display: none;
+            padding-top: 20px;
+            border-top: 1px solid #e0e0e0;
+            margin-top: 15px;
+        }
+
+        .chapter-content.expanded {
+            display: block;
+        }
+
+        .code-block {
+            background: #f5f9ff;
+            border: 1px solid #bbdefb;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 15px 0;
+            font-family: 'Consolas', 'Monaco', monospace;
+            position: relative;
+        }
+
+        .copy-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            padding: 6px 12px;
+            background: #1565c0;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        .copy-btn:hover {
+            background: #0d47a1;
+        }
+
+        .editor-container {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin: 20px 0;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+        }
+
+        .editor-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .editor-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn {
+            padding: 10px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #1565c0 0%, #0d47a1 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            box-shadow: 0 4px 15px rgba(13, 71, 161, 0.4);
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: #e3f2fd;
+            color: #1565c0;
+        }
+
+        .btn-secondary:hover {
+            background: #bbdefb;
+        }
+
+        .CodeMirror {
+            border: 1px solid #bbdefb;
+            border-radius: 8px;
+            font-size: 14px;
+            height: 300px;
+        }
+
+        .output-container {
+            margin-top: 15px;
+        }
+
+        .output-header {
+            font-weight: 600;
+            color: #0d47a1;
+            margin-bottom: 10px;
+        }
+
+        .output-content {
+            background: #1a237e;
+            color: #a5d6a7;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: 'Consolas', 'Monaco', monospace;
+            min-height: 100px;
+            white-space: pre-wrap;
+            overflow-x: auto;
+        }
+
+        .dataframe-container {
+            margin-top: 15px;
+            overflow-x: auto;
+        }
+
+        .dataframe-table {
+            border-collapse: collapse;
+            width: 100%;
+            font-size: 0.9rem;
+        }
+
+        .dataframe-table th,
+        .dataframe-table td {
+            border: 1px solid #bbdefb;
+            padding: 8px 12px;
+            text-align: left;
+        }
+
+        .dataframe-table th {
+            background: #e3f2fd;
+            color: #0d47a1;
+            font-weight: 600;
+        }
+
+        .dataframe-table tr:nth-child(even) {
+            background: #f5f9ff;
+        }
+
+        .quiz-option {
+            padding: 12px 15px;
+            margin: 8px 0;
+            background: #f5f9ff;
+            border: 2px solid transparent;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .quiz-option:hover {
+            background: #e3f2fd;
+            border-color: #1565c0;
+        }
+
+        .quiz-option.selected {
+            border-color: #1565c0;
+            background: #e3f2fd;
+        }
+
+        .quiz-option.correct {
+            border-color: #43a047;
+            background: #e8f5e9;
+        }
+
+        .quiz-option.incorrect {
+            border-color: #e53935;
+            background: #ffebee;
+        }
+
+        .score-display {
+            background: linear-gradient(135deg, #1565c0 0%, #0d47a1 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 12px;
+            text-align: center;
+            margin: 20px 0;
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        .task-list {
+            display: grid;
+            gap: 15px;
+        }
+
+        .task-item {
+            background: #f5f9ff;
+            padding: 18px;
+            border-radius: 8px;
+            border-left: 4px solid #1565c0;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .task-item:hover {
+            background: #e3f2fd;
+            transform: translateX(5px);
+        }
+
+        .task-item.active {
+            background: #e3f2fd;
+            box-shadow: 0 4px 12px rgba(13, 71, 161, 0.2);
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #e3f2fd;
+            border-top-color: #1565c0;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .init-message {
+            text-align: center;
+            padding: 30px;
+            color: #1565c0;
+        }
+
+        h3 {
+            color: #0d47a1;
+            margin-bottom: 15px;
+            font-size: 1.15rem;
+        }
+
+        p {
+            margin-bottom: 10px;
+        }
+
+        ul, ol {
+            margin-left: 25px;
+            margin-bottom: 15px;
+        }
+
+        li {
+            margin-bottom: 8px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>🐍 Python电商数据分析学习平台</h1>
+    </header>
+
+    <div class="container">
+        <div class="nav-tabs">
+            <button class="nav-tab active" data-tab="learn">📚 课程学习</button>
+            <button class="nav-tab" data-tab="practice">💻 编程练习</button>
+            <button class="nav-tab" data-tab="quiz">📝 测评考试</button>
+        </div>
+
+        <!-- 课程学习模块 -->
+        <div class="section active" id="learn">
+            <div class="card">
+                <div class="chapter-header" onclick="toggleChapter(1)">
+                    <span class="chapter-title">第一章：Python基础（电商案例）</span>
+                    <span class="chapter-toggle">▼</span>
+                </div>
+                <div class="chapter-content" id="chapter1">
+                    <h3>1.1 变量与数据类型</h3>
+                    <p>在电商数据分析中，我们常用变量存储商品信息、价格、销量等数据。</p>
+                    <div class="code-block">
+                        <button class="copy-btn" onclick="copyCode(this)">复制</button>
+                        <pre><code># 定义商品信息
+product_name = "无线蓝牙耳机"
+price = 199.0
+sales = 150
+
+# 计算销售额
+revenue = price * sales
+print(f"商品: {product_name}")
+print(f"单价: {price}元")
+print(f"销量: {sales}件")
+print(f"销售额: {revenue}元")</code></pre>
+                    </div>
+
+                    <h3>1.2 条件判断</h3>
+                    <p>筛选符合条件的商品，如单价≥100元的商品。</p>
+                    <div class="code-block">
+                        <button class="copy-btn" onclick="copyCode(this)">复制</button>
+                        <pre><code>products = [
+    {"name": "手机", "price": 2999},
+    {"name": "耳机", "price": 99},
+    {"name": "电脑", "price": 5999}
+]
+
+for p in products:
+    if p["price"] >= 100:
+        print(f"{p['name']}: {p['price']}元")</code></pre>
+                    </div>
+
+                    <h3>1.3 循环与统计</h3>
+                    <p>使用循环统计订单总金额。</p>
+                    <div class="code-block">
+                        <button class="copy-btn" onclick="copyCode(this)">复制</button>
+                        <pre><code>orders = [128, 256, 89, 312, 178, 45, 234, 87, 156, 201]
+total = 0
+
+for amount in orders:
+    total += amount
+
+print(f"10个订单总金额: {total}元")</code></pre>
+                    </div>
+
+                    <h3>1.4 列表操作</h3>
+                    <p>列表存储周销量，计算平均值和最大值。</p>
+                    <div class="code-block">
+                        <button class="copy-btn" onclick="copyCode(this)">复制</button>
+                        <pre><code>weekly_sales = [120, 145, 98, 167, 134, 89, 156]
+
+avg_sales = sum(weekly_sales) / len(weekly_sales)
+max_sales = max(weekly_sales)
+
+print(f"周平均销量: {avg_sales:.1f}件")
+print(f"周最高销量: {max_sales}件")</code></pre>
+                    </div>
+
+                    <h3>1.5 字典与函数</h3>
+                    <p>字典存储用户信息，函数计算折扣价格。</p>
+                    <div class="code-block">
+                        <button class="copy-btn" onclick="copyCode(this)">复制</button>
+                        <pre><code># 字典存储用户信息
+user = {
+    "id": "U001",
+    "name": "张三",
+    "spent": 1280
+}
+
+print(f"用户ID: {user['id']}")
+print(f"姓名: {user['name']}")
+print(f"消费金额: {user['spent']}元")
+
+# 满减函数
+def calculate_price(price):
+    if price >= 200:
+        return price - 30
+    return price
+
+print(f"250元折扣后: {calculate_price(250)}元")
+print(f"150元折扣后: {calculate_price(150)}元")</code></pre>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="chapter-header" onclick="toggleChapter(2)">
+                    <span class="chapter-title">第二章：Pandas电商数据分析实战</span>
+                    <span class="chapter-toggle">▼</span>
+                </div>
+                <div class="chapter-content" id="chapter2">
+                    <h3>2.1 Pandas基础与DataFrame</h3>
+                    <p>使用Pandas创建和操作电商数据表格。</p>
+                    <div class="code-block">
+                        <button class="copy-btn" onclick="copyCode(this)">复制</button>
+                        <pre><code>import pandas as pd
+
+data = {
+    "商品名称": ["手机", "耳机", "电脑", "键盘", "鼠标"],
+    "单价": [2999, 199, 5999, 129, 89],
+    "销量": [150, 320, 80, 450, 520],
+    "品类": ["数码", "配件", "数码", "配件", "配件"]
+}
+
+df = pd.DataFrame(data)
+print(df)</code></pre>
+                    </div>
+
+                    <h3>2.2 数据筛选与排序</h3>
+                    <p>筛选数据并按销量排序获取Top5商品。</p>
+                    <div class="code-block">
+                        <button class="copy-btn" onclick="copyCode(this)">复制</button>
+                        <pre><code>import pandas as pd
+
+data = {
+    "商品名称": ["手机", "耳机", "电脑", "键盘", "鼠标", "充电宝", "数据线", "支架", "膜", "壳"],
+    "销量": [150, 320, 80, 450, 520, 280, 380, 190, 410, 350]
+}
+
+df = pd.DataFrame(data)
+top5 = df.sort_values("销量", ascending=False).head(5)
+print("销量Top5商品:")
+print(top5)</code></pre>
+                    </div>
+
+                    <h3>2.3 数据聚合与统计</h3>
+                    <p>按品类分组统计销售额。</p>
+                    <div class="code-block">
+                        <button class="copy-btn" onclick="copyCode(this)">复制</button>
+                        <pre><code>import pandas as pd
+
+data = {
+    "商品名称": ["手机", "耳机", "电脑", "键盘", "鼠标"],
+    "单价": [2999, 199, 5999, 129, 89],
+    "销量": [150, 320, 80, 450, 520],
+    "品类": ["数码", "配件", "数码", "配件", "配件"]
+}
+
+df = pd.DataFrame(data)
+df["销售额"] = df["单价"] * df["销量"]
+
+category_sales = df.groupby("品类")["销售额"].sum()
+print("各品类总销售额:")
+print(category_sales)</code></pre>
+                    </div>
+
+                    <h3>2.4 日期处理与用户分析</h3>
+                    <p>处理日期数据，筛选活跃用户。</p>
+                    <div class="code-block">
+                        <button class="copy-btn" onclick="copyCode(this)">复制</button>
+                        <pre><code>import pandas as pd
+from datetime import datetime, timedelta
+
+data = {
+    "用户ID": ["U001", "U002", "U003", "U004", "U005"],
+    "最后活跃": ["2026-06-07", "2026-06-01", "2026-06-05", "2026-05-20", "2026-06-08"],
+    "消费金额": [1280, 560, 2100, 890, 3200]
+}
+
+df = pd.DataFrame(data)
+df["最后活跃"] = pd.to_datetime(df["最后活跃"])
+
+seven_days_ago = datetime.now() - timedelta(days=7)
+active_users = df[df["最后活跃"] >= seven_days_ago]
+print("近7天活跃用户:")
+print(active_users)</code></pre>
+                    </div>
+
+                    <h3>2.5 业务指标计算</h3>
+                    <p>计算客单价和订单转化率。</p>
+                    <div class="code-block">
+                        <button class="copy-btn" onclick="copyCode(this)">复制</button>
+                        <pre><code>import pandas as pd
+
+# 订单数据
+orders_data = {
+    "订单ID": ["O001", "O002", "O003", "O004", "O005"],
+    "用户ID": ["U001", "U002", "U001", "U003", "U004"],
+    "金额": [299, 159, 899, 45, 199]
+}
+
+orders_df = pd.DataFrame(orders_data)
+
+# 计算客单价
+total_revenue = orders_df["金额"].sum()
+unique_users = orders_df["用户ID"].nunique()
+avg_order_value = total_revenue / unique_users
+
+# 模拟转化率计算
+visitors = 500
+buyers = unique_users
+conversion_rate = (buyers / visitors) * 100
+
+print(f"总销售额: {total_revenue}元")
+print(f"购买用户数: {unique_users}人")
+print(f"客单价: {avg_order_value:.2f}元")
+print(f"访客数: {visitors}人")
+print(f"订单转化率: {conversion_rate:.2f}%")</code></pre>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>💡 在线代码演示区</h3>
+                <p>在下方编辑器中编写Python代码，点击运行查看结果（支持Pandas）</p>
+                <div class="editor-container">
+                    <div class="editor-header">
+                        <span style="font-weight: 600; color: #0d47a1;">Python 编辑器</span>
+                        <div class="editor-buttons">
+                            <button class="btn btn-primary" onclick="runCode('learn-editor', 'learn-output', 'learn-df')">▶️ 运行代码</button>
+                            <button class="btn btn-secondary" onclick="clearEditor('learn-editor', 'learn-output', 'learn-df')">🗑️ 清空</button>
+                        </div>
+                    </div>
+                    <textarea id="learn-editor">import pandas as pd
+
+# 电商数据示例
+data = {
+    "商品": ["手机", "耳机", "电脑", "键盘"],
+    "单价": [2999, 199, 5999, 129],
+    "销量": [150, 320, 80, 450]
+}
+
+df = pd.DataFrame(data)
+df["销售额"] = df["单价"] * df["销量"]
+print("电商数据报表:")
+print(df)
+print("\n总销售额:", df["销售额"].sum(), "元")</textarea>
+                    <div class="output-container">
+                        <div class="output-header">📤 输出结果</div>
+                        <div class="output-content" id="learn-output">点击"运行代码"按钮执行...</div>
+                        <div class="dataframe-container" id="learn-df"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 编程练习模块 -->
+        <div class="section" id="practice">
+            <div class="card">
+                <h3>📋 10个电商编程练习任务</h3>
+                <div class="task-list" id="task-list">
+                    <div class="task-item" onclick="loadTask(1)">1. 定义变量存储商品名称、价格、销量，计算销售额</div>
+                    <div class="task-item" onclick="loadTask(2)">2. 条件判断筛选单价≥100元的商品</div>
+                    <div class="task-item" onclick="loadTask(3)">3. for循环统计10个订单总金额</div>
+                    <div class="task-item" onclick="loadTask(4)">4. 列表存储周销量，计算平均值、最大值</div>
+                    <div class="task-item" onclick="loadTask(5)">5. 字典存储用户ID、姓名、消费金额</div>
+                    <div class="task-item" onclick="loadTask(6)">6. 函数实现满200减30价格计算</div>
+                    <div class="task-item" onclick="loadTask(7)">7. 统计销量Top5商品</div>
+                    <div class="task-item" onclick="loadTask(8)">8. 筛选近7天活跃用户</div>
+                    <div class="task-item" onclick="loadTask(9)">9. 计算店铺客单价、订单转化率</div>
+                    <div class="task-item" onclick="loadTask(10)">10. 按商品品类统计总销售额</div>
+                </div>
+            </div>
+
+            <div class="editor-container">
+                <div class="editor-header">
+                    <span style="font-weight: 600; color: #0d47a1;">练习编辑器 - <span id="current-task-title">任务1</span></span>
+                    <div class="editor-buttons">
+                        <button class="btn btn-primary" onclick="runCode('practice-editor', 'practice-output', 'practice-df')">▶️ 运行代码</button>
+                        <button class="btn btn-secondary" onclick="clearEditor('practice-editor', 'practice-output', 'practice-df')">🗑️ 清空</button>
+                    </div>
+                </div>
+                <textarea id="practice-editor"></textarea>
+                <div class="output-container">
+                    <div class="output-header">📤 输出结果</div>
+                    <div class="output-content" id="practice-output">请从上方选择练习任务...</div>
+                    <div class="dataframe-container" id="practice-df"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 测评考试模块 -->
+        <div class="section" id="quiz">
+            <div class="card">
+                <h3>📝 电商数据分析测评</h3>
+                <p style="margin-bottom: 20px;">本测评共10题，满分100分：单选题5道（每题10分）+ 代码题5道（每题10分）</p>
+                <button class="btn btn-primary" onclick="startQuiz()">开始测评</button>
+                <button class="btn btn-secondary" onclick="submitQuiz()" id="submit-btn" style="display: none;">提交答案</button>
+            </div>
+
+            <div id="quiz-container" style="display: none;">
+            </div>
+
+            <div id="quiz-result" style="display: none;">
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let pyodide = null;
+        let currentTask = 1;
+        let quizAnswers = {};
+        let codeAnswers = {};
+
+        const tasks = {
+            1: {
+                title: "任务1：定义变量存储商品名称、价格、销量，计算销售额",
+                code: "# 定义三个变量：商品名称、价格、销量\n# 计算销售额 = 价格 × 销量\n# 打印输出结果\n\nproduct_name = \"无线蓝牙耳机\"\nprice = 199.0\nsales = 150\n\nrevenue = price * sales\nprint(f\"商品：{product_name}\")\nprint(f\"单价：{price}元\")\nprint(f\"销量：{sales}件\")\nprint(f\"销售额：{revenue}元\")"
+            },
+            2: {
+                title: "任务2：条件判断筛选单价≥100元的商品",
+                code: "# 给定商品列表，筛选单价≥100元的商品\n\nproducts = [\n    {\"name\": \"手机\", \"price\": 2999},\n    {\"name\": \"耳机\", \"price\": 99},\n    {\"name\": \"电脑\", \"price\": 5999},\n    {\"name\": \"数据线\", \"price\": 25},\n    {\"name\": \"键盘\", \"price\": 129}\n]\n\nprint(\"单价≥100元的商品：\")\nfor p in products:\n    if p[\"price\"] >= 100:\n        print(f\"{p['name']}: {p['price']}元\")"
+            },
+            3: {
+                title: "任务3：for循环统计10个订单总金额",
+                code: "# 使用for循环遍历订单列表，计算总金额\n\norders = [128, 256, 89, 312, 178, 45, 234, 87, 156, 201]\ntotal = 0\n\nfor amount in orders:\n    total += amount\n\nprint(f\"10个订单总金额：{total}元\")"
+            },
+            4: {
+                title: "任务4：列表存储周销量，计算平均值、最大值",
+                code: "# 列表存储一周的销量数据\n# 计算平均值和最大值\n\nweekly_sales = [120, 145, 98, 167, 134, 89, 156]\n\navg_sales = sum(weekly_sales) / len(weekly_sales)\nmax_sales = max(weekly_sales)\n\nprint(f\"周销量数据：{weekly_sales}\")\nprint(f\"周平均销量：{avg_sales:.1f}件\")\nprint(f\"周最高销量：{max_sales}件\")"
+            },
+            5: {
+                title: "任务5：字典存储用户ID、姓名、消费金额",
+                code: "# 使用字典存储用户信息并打印\n\nuser = {\n    \"id\": \"U001\",\n    \"name\": \"张三\",\n    \"spent\": 1280\n}\n\nprint(\"用户信息：\")\nprint(f\"用户ID：{user['id']}\")\nprint(f\"姓名：{user['name']}\")\nprint(f\"消费金额：{user['spent']}元\")"
+            },
+            6: {
+                title: "任务6：函数实现满200减30价格计算",
+                code: "# 定义函数，实现满200减30的优惠计算\n\ndef calculate_price(price):\n    if price >= 200:\n        return price - 30\n    return price\n\ntest_prices = [150, 250, 89, 399, 199]\n\nfor p in test_prices:\n    final = calculate_price(p)\n    print(f\"原价：{p}元 → 折后：{final}元\")"
+            },
+            7: {
+                title: "任务7：统计销量Top5商品",
+                code: "import pandas as pd\n\n# 创建商品销量数据，找出Top5\n\ndata = {\n    \"商品名称\": [\"手机\", \"耳机\", \"电脑\", \"键盘\", \"鼠标\", \"充电宝\", \"数据线\", \"支架\", \"膜\", \"壳\"],\n    \"销量\": [150, 320, 80, 450, 520, 280, 380, 190, 410, 350]\n}\n\ndf = pd.DataFrame(data)\ntop5 = df.sort_values(\"销量\", ascending=False).head(5)\nprint(\"销量Top5商品：\")\nprint(top5)"
+            },
+            8: {
+                title: "任务8：筛选近7天活跃用户",
+                code: "import pandas as pd\nfrom datetime import datetime, timedelta\n\n# 筛选近7天有活跃记录的用户\n\ndata = {\n    \"用户ID\": [\"U001\", \"U002\", \"U003\", \"U004\", \"U005\", \"U006\", \"U007\"],\n    \"最后活跃\": [\"2026-06-07\", \"2026-06-01\", \"2026-06-05\", \"2026-05-20\", \"2026-06-08\", \"2026-06-06\", \"2026-05-25\"],\n    \"消费金额\": [1280, 560, 2100, 890, 3200, 450, 780]\n}\n\ndf = pd.DataFrame(data)\ndf[\"最后活跃\"] = pd.to_datetime(df[\"最后活跃\"])\n\nseven_days_ago = datetime.now() - timedelta(days=7)\nactive_users = df[df[\"最后活跃\"] >= seven_days_ago]\n\nprint(\"近7天活跃用户：\")\nprint(active_users)"
+            },
+            9: {
+                title: "任务9：计算店铺客单价、订单转化率",
+                code: "import pandas as pd\n\n# 计算客单价和订单转化率\n\norders_data = {\n    \"订单ID\": [\"O001\", \"O002\", \"O003\", \"O004\", \"O005\", \"O006\", \"O007\", \"O008\"],\n    \"用户ID\": [\"U001\", \"U002\", \"U001\", \"U003\", \"U004\", \"U002\", \"U005\", \"U003\"],\n    \"金额\": [299, 159, 899, 45, 199, 89, 599, 129]\n}\n\norders_df = pd.DataFrame(orders_data)\n\ntotal_revenue = orders_df[\"金额\"].sum()\nunique_users = orders_df[\"用户ID\"].nunique()\navg_order_value = total_revenue / unique_users\n\nvisitors = 500\nbuyers = unique_users\nconversion_rate = (buyers / visitors) * 100\n\nprint(\"店铺运营指标：\")\nprint(f\"总销售额：{total_revenue}元\")\nprint(f\"购买用户数：{unique_users}人\")\nprint(f\"客单价：{avg_order_value:.2f}元\")\nprint(f\"访客数：{visitors}人\")\nprint(f\"订单转化率：{conversion_rate:.2f}%\")"
+            },
+            10: {
+                title: "任务10：按商品品类统计总销售额",
+                code: "import pandas as pd\n\n# 按商品品类分组，统计各品类的总销售额\n\ndata = {\n    \"商品名称\": [\"手机\", \"耳机\", \"电脑\", \"键盘\", \"鼠标\", \"T恤\", \"裤子\", \"鞋子\"],\n    \"单价\": [2999, 199, 5999, 129, 89, 99, 199, 399],\n    \"销量\": [150, 320, 80, 450, 520, 280, 190, 120],\n    \"品类\": [\"数码\", \"配件\", \"数码\", \"配件\", \"配件\", \"服装\", \"服装\", \"服装\"]\n}\n\ndf = pd.DataFrame(data)\ndf[\"销售额\"] = df[\"单价\"] * df[\"销量\"]\n\ncategory_sales = df.groupby(\"品类\")[\"销售额\"].sum().sort_values(ascending=False)\n\nprint(\"各品类总销售额：\")\nprint(category_sales)"
+            }
+        };
+
+        const quizQuestions = [
+            {
+                type: "choice",
+                question: "1. 电商数据中，客单价的计算公式是？",
+                options: ["总销售额 ÷ 订单数", "总销售额 ÷ 购买用户数", "订单数 ÷ 访客数", "购买用户数 ÷ 访客数"],
+                answer: 1
+            },
+            {
+                type: "choice",
+                question: "2. 在Python中，用来存储键值对数据的结构是？",
+                options: ["列表(List)", "元组(Tuple)", "字典(Dictionary)", "集合(Set)"],
+                answer: 2
+            },
+            {
+                type: "choice",
+                question: "3. Pandas中用于读取CSV文件的函数是？",
+                options: ["pd.read_csv()", "pd.read_excel()", "pd.load_csv()", "pd.open_csv()"],
+                answer: 0
+            },
+            {
+                type: "choice",
+                question: "4. 订单转化率的计算公式是？",
+                options: ["订单数 ÷ 访客数 × 100%", "总销售额 ÷ 订单数", "购买用户数 ÷ 总用户数", "复购用户数 ÷ 购买用户数"],
+                answer: 0
+            },
+            {
+                type: "choice",
+                question: "5. DataFrame按某列降序排序的方法是？",
+                options: ["df.sort_values('col', ascending=True)", "df.sort_values('col', ascending=False)", "df.sort('col', descending=True)", "df.order('col', False)"],
+                answer: 1
+            },
+            {
+                type: "code",
+                question: "6. 代码题：定义变量a=100，b=20，计算它们的乘积并print输出",
+                answer: "2000"
+            },
+            {
+                type: "code",
+                question: "7. 代码题：创建列表nums = [10, 20, 30, 40, 50]，计算列表元素之和并print输出",
+                answer: "150"
+            },
+            {
+                type: "code",
+                question: "8. 代码题：定义函数add(a, b)返回a+b，调用add(15, 25)并print结果",
+                answer: "40"
+            },
+            {
+                type: "code",
+                question: "9. 代码题：使用range生成1到10的整数，计算它们的总和并print输出",
+                answer: "55"
+            },
+            {
+                type: "code",
+                question: "10. 代码题：创建字典d = {'a': 10, 'b': 20, 'c': 30}，输出所有value的和",
+                answer: "60"
+            }
+        ];
+
+        async function initPyodide() {
+            const output = document.getElementById('learn-output');
+            output.innerHTML = '<div class="init-message"><span class="loading"></span> 正在加载Python环境，请稍候...</div>';
+            
+            try {
+                pyodide = await loadPyodide();
+                await pyodide.loadPackage('pandas');
+                output.innerHTML = 'Python环境加载完成！可以开始写代码了。';
+            } catch (error) {
+                output.innerHTML = '环境加载失败：' + error;
+            }
+        }
+
+        function initEditors() {
+            ['learn-editor', 'practice-editor'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) {
+                    el.CodeMirror = CodeMirror.fromTextArea(el, {
+                        mode: 'python',
+                        theme: 'dracula',
+                        lineNumbers: true,
+                        indentUnit: 4,
+                        tabSize: 4,
+                        indentWithTabs: false
+                    });
+                }
+            });
+            loadTask(1);
+        }
+
+        function toggleChapter(num) {
+            const header = document.querySelector(`#chapter${num}`).previousElementSibling;
+            const content = document.getElementById(`chapter${num}`);
+            header.classList.toggle('expanded');
+            content.classList.toggle('expanded');
+        }
+
+        function copyCode(btn) {
+            const code = btn.parentElement.querySelector('code').innerText;
+            navigator.clipboard.writeText(code);
+            btn.innerText = '已复制';
+            setTimeout(() => btn.innerText = '复制', 2000);
+        }
+
+        function switchTab(tabName) {
+            document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+            document.querySelector(`[data-tab="${tabName}"]`).classList.add('active');
+            
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            document.getElementById(tabName).classList.add('active');
+        }
+
+        function loadTask(num) {
+            currentTask = num;
+            const task = tasks[num];
+            document.getElementById('current-task-title').innerText = task.title;
+            const editor = document.getElementById('practice-editor').CodeMirror;
+            editor.setValue(task.code);
+            
+            document.querySelectorAll('.task-item').forEach((item, idx) => {
+                item.classList.toggle('active', idx === num - 1);
+            });
+        }
+
+        async function runCode(editorId, outputId, dfId) {
+            if (!pyodide) {
+                document.getElementById(outputId).innerHTML = 'Python环境正在加载中，请稍候...';
+                return;
+            }
+
+            const editor = document.getElementById(editorId).CodeMirror;
+            const code = editor.getValue();
+            const outputEl = document.getElementById(outputId);
+            const dfEl = document.getElementById(dfId);
+            
+            outputEl.innerHTML = '运行中...';
+            dfEl.innerHTML = '';
+
+            try {
+                pyodide.runPython(`
+import sys
+from io import StringIO
+sys.stdout = StringIO()
+`);
+                
+                pyodide.runPython(code);
+                
+                const output = pyodide.runPython('sys.stdout.getvalue()');
+                
+                try {
+                    const dfHtml = pyodide.runPython(`
+import pandas as pd
+result = ''
+_globals = globals()
+for name in _globals:
+    if isinstance(_globals[name], pd.DataFrame):
+        result = _globals[name].to_html(index=False, border=0, classes='dataframe-table')
+        break
+result
+`);
+                    if (dfHtml) {
+                        dfEl.innerHTML = '<div class="output-header">📊 数据表格</div>' + dfHtml;
+                    }
+                } catch (e) {}
+                
+                if (output) {
+                    outputEl.innerHTML = output;
+                } else {
+                    outputEl.innerHTML = '代码执行完成，无输出。';
+                }
+            } catch (error) {
+                outputEl.innerHTML = '错误: ' + error;
+            }
+        }
+
+        function clearEditor(editorId, outputId, dfId) {
+            const editor = document.getElementById(editorId).CodeMirror;
+            editor.setValue('');
+            document.getElementById(outputId).innerHTML = '点击"运行代码"按钮执行...';
+            document.getElementById(dfId).innerHTML = '';
+        }
+
+        function startQuiz() {
+            quizAnswers = {};
+            codeAnswers = {};
+            document.getElementById('quiz-container').style.display = 'block';
+            document.getElementById('quiz-result').style.display = 'none';
+            document.querySelector('[onclick="startQuiz()"]').style.display = 'none';
+            document.getElementById('submit-btn').style.display = 'inline-block';
+            
+            let html = '';
+            quizQuestions.forEach((q, idx) => {
+                html += '<div class="card">';
+                if (q.type === 'choice') {
+                    html += `<h3>${q.question}</h3>`;
+                    q.options.forEach((opt, oidx) => {
+                        html += `<div class="quiz-option" data-q="${idx}" data-o="${oidx}" onclick="selectChoice(${idx}, ${oidx}, this)">${String.fromCharCode(65 + oidx)}. ${opt}</div>`;
+                    });
+                } else {
+                    html += `<h3>${q.question}</h3>`;
+                    html += `<textarea id="code-quiz-${idx}" style="width:100%;height:150px;border:1px solid #bbdefb;border-radius:8px;padding:10px;font-family:Consolas,monospace;font-size:14px;"></textarea>`;
+                    html += `<div style="margin-top:10px;"><button class="btn btn-secondary" onclick="runQuizCode(${idx})">测试运行</button> <span style="color:#1565c0;font-size:0.9rem;">（最后输出的数值将作为答案）</span></div>`;
+                    html += `<div id="quiz-code-output-${idx}" class="output-content" style="margin-top:10px;font-size:0.85rem;min-height:60px;"></div>`;
+                }
+                html += '</div>';
+            });
+            document.getElementById('quiz-container').innerHTML = html;
+        }
+
+        function selectChoice(qIdx, oIdx, el) {
+            quizAnswers[qIdx] = oIdx;
+            el.parentElement.querySelectorAll('.quiz-option').forEach(e => e.classList.remove('selected'));
+            el.classList.add('selected');
+        }
+
+        async function runQuizCode(qIdx) {
+            if (!pyodide) {
+                alert('请先在课程学习页面等待Python环境加载完成');
+                return;
+            }
+            const code = document.getElementById(`code-quiz-${qIdx}`).value;
+            const outputEl = document.getElementById(`quiz-code-output-${qIdx}`);
+            outputEl.innerHTML = '运行中...';
+            try {
+                pyodide.runPython(`
+import sys
+from io import StringIO
+sys.stdout = StringIO()
+`);
+                pyodide.runPython(code);
+                const output = pyodide.runPython('sys.stdout.getvalue()');
+                outputEl.innerHTML = output;
+                codeAnswers[qIdx] = output.trim();
+            } catch (e) {
+                outputEl.innerHTML = '错误: ' + e;
+            }
+        }
+
+        async function submitQuiz() {
+            let score = 0;
+            let resultHtml = '<div class="card">';
+            
+            quizQuestions.forEach((q, idx) => {
+                resultHtml += '<div style="margin-bottom:20px;padding-bottom:15px;border-bottom:1px solid #e0e0e0;">';
+                if (q.type === 'choice') {
+                    resultHtml += `<h3 style="margin-bottom:10px;">${q.question}</h3>`;
+                    const userAns = quizAnswers[idx];
+                    const correct = userAns === q.answer;
+                    if (correct) score += 10;
+                    q.options.forEach((opt, oidx) => {
+                        let cls = '';
+                        if (oidx === q.answer) cls = 'correct';
+                        else if (userAns === oidx && !correct) cls = 'incorrect';
+                        resultHtml += `<div class="quiz-option ${cls}" style="pointer-events:none;">${String.fromCharCode(65 + oidx)}. ${opt}</div>`;
+                    });
+                    resultHtml += `<div style="margin-top:8px;font-weight:600;color:${correct ? '#43a047' : '#e53935'};">${correct ? '✓ 正确 (+10分)' : '✗ 错误'}</div>`;
+                } else {
+                    resultHtml += `<h3 style="margin-bottom:10px;">${q.question}</h3>`;
+                    const userCode = document.getElementById(`code-quiz-${idx}`).value;
+                    let userOutput = codeAnswers[idx] || '';
+                    let correct = false;
+                    
+                    try {
+                        pyodide.runPython(`
+import sys
+from io import StringIO
+sys.stdout = StringIO()
+`);
+                        pyodide.runPython(userCode);
+                        const output = pyodide.runPython('sys.stdout.getvalue()').trim();
+                        const nums = output.match(/-?\d+(\.\d+)?/g);
+                        if (nums && nums.includes(q.answer)) {
+                            correct = true;
+                        }
+                        userOutput = output;
+                    } catch (e) {}
+                    
+                    if (correct) score += 10;
+                    resultHtml += `<div style="background:#f5f9ff;padding:15px;border-radius:8px;margin-bottom:8px;font-family:Consolas,monospace;">${userCode}</div>`;
+                    resultHtml += `<div style="margin-bottom:8px;">程序输出：<span style="font-family:Consolas,monospace;background:#1a237e;color:#a5d6a7;padding:4px 8px;border-radius:4px;">${userOutput || '(无输出)'}</span></div>`;
+                    resultHtml += `<div style="margin-bottom:8px;">正确答案应输出：<span style="font-family:Consolas,monospace;background:#e8f5e9;color:#2e7d32;padding:4px 8px;border-radius:4px;">${q.answer}</span></div>`;
+                    resultHtml += `<div style="font-weight:600;color:${correct ? '#43a047' : '#e53935'};">${correct ? '✓ 正确 (+10分)' : '✗ 错误'}</div>`;
+                }
+                resultHtml += '</div>';
+            });
+            
+            resultHtml += '</div>';
+            document.getElementById('quiz-container').style.display = 'none';
+            document.getElementById('submit-btn').style.display = 'none';
+            document.querySelector('[onclick="startQuiz()"]').style.display = 'inline-block';
+            document.getElementById('quiz-result').style.display = 'block';
+            document.getElementById('quiz-result').innerHTML = `<div class="score-display">🎉 测评得分：${score} / 100 分</div>` + resultHtml;
+        }
+
+        document.querySelectorAll('.nav-tab').forEach(tab => {
+            tab.addEventListener('click', () => switchTab(tab.dataset.tab));
+        });
+
+        window.addEventListener('DOMContentLoaded', () => {
+            initEditors();
+            initPyodide();
+        });
+    </script>
+</body>
+</html>
